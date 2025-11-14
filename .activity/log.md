@@ -1,3 +1,4 @@
 - 2025-11-10T02:35:55+05:30: Improved UI responsiveness
 - 2025-11-10T13:56:36+05:30: Fixed notification handling
 - 2025-11-12T10:52:51+05:30: Updated Gradle dependencies
+- 2025-11-14T13:05:01+05:30: Fixed notification handling
