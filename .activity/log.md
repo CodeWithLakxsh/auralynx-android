@@ -5,3 +5,4 @@
 - 2025-11-14T22:38:03+05:30: Fixed notification handling
 - 2025-11-15T00:55:30+05:30: Updated Gradle dependencies
 - 2025-11-17T12:20:45+05:30: Refactored media player service
+- 2025-11-17T13:36:42+05:30: Updated audio processing pipeline
