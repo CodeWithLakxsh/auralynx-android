@@ -8,3 +8,4 @@
 - 2025-11-17T13:36:42+05:30: Updated audio processing pipeline
 - 2025-11-17T02:40:27+05:30: Updated audio processing pipeline
 - 2025-11-17T14:27:44+05:30: Updated audio processing pipeline
+- 2025-11-18T14:07:34+05:30: Improved UI responsiveness
