@@ -10,3 +10,4 @@
 - 2025-11-17T14:27:44+05:30: Updated audio processing pipeline
 - 2025-11-18T14:07:34+05:30: Improved UI responsiveness
 - 2025-11-20T17:00:20+05:30: Improved UI responsiveness
+- 2025-11-21T03:59:56+05:30: Refactored media player service
