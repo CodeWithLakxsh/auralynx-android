@@ -11,3 +11,4 @@
 - 2025-11-18T14:07:34+05:30: Improved UI responsiveness
 - 2025-11-20T17:00:20+05:30: Improved UI responsiveness
 - 2025-11-21T03:59:56+05:30: Refactored media player service
+- 2025-11-24T12:01:30+05:30: Fixed notification handling
