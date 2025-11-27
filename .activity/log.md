@@ -14,3 +14,4 @@
 - 2025-11-24T12:01:30+05:30: Fixed notification handling
 - 2025-11-24T13:49:52+05:30: Updated Gradle dependencies
 - 2025-11-25T00:45:38+05:30: Updated Gradle dependencies
+- 2025-11-27T13:01:35+05:30: Fixed notification handling
