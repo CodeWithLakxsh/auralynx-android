@@ -28,3 +28,4 @@
 - 2025-12-08T18:36:10+05:30: Updated audio processing pipeline
 - 2025-12-08T11:28:53+05:30: Enhanced audio codec support
 - 2025-12-10T22:38:54+05:30: Updated audio processing pipeline
+- 2025-12-12T12:32:15+05:30: Fixed notification handling
