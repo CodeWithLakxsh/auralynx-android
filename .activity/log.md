@@ -41,3 +41,4 @@
 - 2025-12-18T12:29:28+05:30: Enhanced audio codec support
 - 2025-12-22T12:35:22+05:30: Updated audio processing pipeline
 - 2025-12-23T13:29:15+05:30: Enhanced audio codec support
+- 2025-12-23T11:42:12+05:30: Refactored media player service
