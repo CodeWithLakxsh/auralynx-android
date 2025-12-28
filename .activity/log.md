@@ -277,3 +277,4 @@
 - 2025-12-28T15:10:37+05:30: Codec optimization
 - 2025-12-28T09:06:03+05:30: UI overhaul
 - 2025-12-28T15:02:21+05:30: Codec optimization
+- 2025-12-28T17:28:12+05:30: Audio engine refactor
