@@ -709,3 +709,4 @@
 - 2025-12-25T20:24:09+05:30: Audio engine refactor
 - 2025-12-25T22:18:29+05:30: Codec optimization
 - 2025-12-29T20:43:36+05:30: Codec optimization
+- 2025-12-29T12:36:30+05:30: UI overhaul
