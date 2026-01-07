@@ -51,3 +51,4 @@
 - 2025-12-30T09:05:32+05:30: Updated Gradle dependencies
 - 2026-01-02T22:30:37+05:30: Enhanced audio codec support
 - 2026-01-05T00:50:09+05:30: Enhanced audio codec support
+- 2026-01-07T09:28:11+05:30: Improved UI responsiveness
