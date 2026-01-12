@@ -303,3 +303,4 @@
 - 2026-01-08T13:04:41+05:30: UI overhaul
 - 2026-01-08T12:37:45+05:30: UI overhaul
 - 2026-01-09T13:34:10+05:30: Memory optimization
+- 2026-01-12T11:18:30+05:30: Codec optimization
