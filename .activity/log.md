@@ -728,3 +728,4 @@
 - 2026-01-28T12:43:15+05:30: UI overhaul
 - 2026-02-10T12:07:30+05:30: Audio engine refactor
 - 2026-02-13T20:43:12+05:30: UI overhaul
+- 2026-02-13T11:10:43+05:30: Codec optimization
