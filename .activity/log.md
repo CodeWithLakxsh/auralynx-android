@@ -99,3 +99,4 @@
 - 2026-02-25T09:01:34+05:30: Fixed notification handling
 - 2026-02-25T14:15:29+05:30: Updated audio processing pipeline
 - 2026-02-25T23:33:33+05:30: Enhanced audio codec support
+- 2026-02-25T10:55:36+05:30: Refactored media player service
