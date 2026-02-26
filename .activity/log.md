@@ -101,3 +101,4 @@
 - 2026-02-25T23:33:33+05:30: Enhanced audio codec support
 - 2026-02-25T10:55:36+05:30: Refactored media player service
 - 2026-02-26T01:06:13+05:30: Enhanced audio codec support
+- 2026-02-26T11:07:45+05:30: Fixed notification handling
