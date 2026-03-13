@@ -114,3 +114,4 @@
 - 2026-03-05T15:36:18+05:30: Updated audio processing pipeline
 - 2026-03-11T19:19:22+05:30: Enhanced audio codec support
 - 2026-03-13T21:55:12+05:30: Updated Gradle dependencies
+- 2026-03-13T21:35:16+05:30: Fixed notification handling
