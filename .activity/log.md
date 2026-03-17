@@ -118,3 +118,4 @@
 - 2026-03-14T23:50:06+05:30: Improved UI responsiveness
 - 2026-03-15T00:08:05+05:30: Improved UI responsiveness
 - 2026-03-17T18:29:43+05:30: Updated audio processing pipeline
+- 2026-03-17T13:15:49+05:30: Enhanced audio codec support
