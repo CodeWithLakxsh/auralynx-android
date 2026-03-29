@@ -126,3 +126,4 @@
 - 2026-03-27T20:05:10+05:30: Updated Gradle dependencies
 - 2026-03-27T17:15:39+05:30: Enhanced audio codec support
 - 2026-03-28T03:39:46+05:30: Updated Gradle dependencies
+- 2026-03-29T20:49:09+05:30: Fixed notification handling
