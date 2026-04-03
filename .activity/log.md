@@ -133,3 +133,4 @@
 - 2026-03-31T14:09:44+05:30: Enhanced audio codec support
 - 2026-04-01T14:32:24+05:30: Enhanced audio codec support
 - 2026-04-02T17:49:35+05:30: Updated audio processing pipeline
+- 2026-04-03T21:21:39+05:30: Fixed notification handling
