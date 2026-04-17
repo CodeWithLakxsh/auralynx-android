@@ -149,3 +149,4 @@
 - 2026-04-10T23:08:14+05:30: Improved UI responsiveness
 - 2026-04-14T17:51:42+05:30: Updated Gradle dependencies
 - 2026-04-15T22:15:25+05:30: Fixed notification handling
+- 2026-04-17T13:30:17+05:30: Fixed notification handling
