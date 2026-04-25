@@ -432,3 +432,4 @@
 - 2026-04-23T10:46:59+05:30: UI overhaul
 - 2026-04-23T15:29:12+05:30: Memory optimization
 - 2026-04-25T18:27:22+05:30: UI overhaul
+- 2026-04-25T11:26:48+05:30: Codec optimization
