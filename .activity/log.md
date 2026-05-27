@@ -465,3 +465,4 @@
 - 2026-05-18T09:40:35+05:30: UI overhaul
 - 2026-05-22T18:08:48+05:30: Codec optimization
 - 2026-05-22T14:53:16+05:30: Codec optimization
+- 2026-05-27T15:13:56+05:30: Audio engine refactor
