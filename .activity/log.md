@@ -204,3 +204,4 @@
 - 2026-05-30T13:09:09+05:30: Fixed notification handling
 - 2026-06-02T09:53:16+05:30: Refactored media player service
 - 2026-06-04T01:19:48+05:30: Enhanced audio codec support
+- 2026-06-06T18:09:38+05:30: Enhanced audio codec support
