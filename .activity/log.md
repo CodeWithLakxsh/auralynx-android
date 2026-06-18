@@ -215,3 +215,4 @@
 - 2026-06-16T17:57:49+05:30: Fixed notification handling
 - 2026-06-18T18:53:04+05:30: Enhanced audio codec support
 - 2026-06-18T00:03:45+05:30: Improved UI responsiveness
+- 2026-06-18T10:23:33+05:30: Fixed notification handling
