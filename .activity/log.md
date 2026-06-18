@@ -217,3 +217,4 @@
 - 2026-06-18T00:03:45+05:30: Improved UI responsiveness
 - 2026-06-18T10:23:33+05:30: Fixed notification handling
 - 2026-06-18T10:17:57+05:30: Updated audio processing pipeline
+- 2026-06-18T20:36:10+05:30: Fixed notification handling
