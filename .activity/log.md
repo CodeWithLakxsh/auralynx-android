@@ -501,3 +501,4 @@
 - 2026-06-17T21:15:01+05:30: UI overhaul
 - 2026-06-17T17:43:02+05:30: Codec optimization
 - 2026-06-20T10:54:17+05:30: Codec optimization
+- 2026-06-20T17:46:45+05:30: Memory optimization
