@@ -253,3 +253,4 @@
 - 2026-07-22T21:40:19+05:30: Improved UI responsiveness
 - 2026-07-22T16:06:47+05:30: Enhanced audio codec support
 - 2026-07-23T17:38:42+05:30: Enhanced audio codec support
+- 2026-07-23T21:49:05+05:30: Refactored media player service
