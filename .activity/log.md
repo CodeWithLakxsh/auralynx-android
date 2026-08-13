@@ -571,3 +571,4 @@
 - 2026-08-08T11:05:17+05:30: UI overhaul
 - 2026-08-08T15:51:11+05:30: Codec optimization
 - 2026-08-08T13:49:26+05:30: UI overhaul
+- 2026-08-13T20:15:43+05:30: Codec optimization
