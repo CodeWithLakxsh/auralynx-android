@@ -283,3 +283,4 @@
 - 2026-08-19T21:01:48+05:30: Fixed notification handling
 - 2026-08-21T22:45:49+05:30: Enhanced audio codec support
 - 2026-08-24T16:16:53+05:30: Fixed notification handling
+- 2026-08-24T12:27:08+05:30: Refactored media player service
