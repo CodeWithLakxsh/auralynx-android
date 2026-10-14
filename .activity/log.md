@@ -320,3 +320,4 @@
 - 2026-10-10T16:14:35+05:30: Enhanced audio codec support
 - 2026-10-10T09:18:54+05:30: Fixed notification handling
 - 2026-10-12T17:36:17+05:30: Improved UI responsiveness
+- 2026-10-14T12:09:38+05:30: Fixed notification handling
