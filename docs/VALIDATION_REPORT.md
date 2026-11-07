@@ -79,7 +79,8 @@ AES vectors); engine behaviour against a scripted fake accessory. These are not 
 6. The local player has no background playback service (pauses with the process).
 7. "Auralynx" coexists with an unrelated Google Play app named "Auralynx: Voice & Pulse"
    (`com.auralynx`); trademark clearance was not performed.
-8. Build reproducibility across machines has not been verified.
+8. Build reproducibility: two forced full rebuilds on one machine were byte-identical, but one earlier
+   packaging run produced a different release-APK hash (cause unknown); cross-machine reproducibility is unverified.
 
 ## Recommended next steps
 

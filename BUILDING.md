@@ -72,7 +72,10 @@ Gradle wrapper: the wrapper is checksum-pinned, all dependency versions are fixe
 dependency metadata is not embedded in the APK (`dependenciesInfo` disabled), and the build does not
 inject timestamps or VCS data. To verify, build the same tag twice on clean machines and compare the
 unsigned release APKs (`apksigner` signatures differ by key; compare `app-release-unsigned.apk`).
-Reproducibility has **not yet been verified** across machines; see ROADMAP.md.
+Observed on 2026-11-07 (Apple M2, JDK 17.0.19): two full rebuilds of the unsigned release APK with
+`--rerun-tasks` were byte-identical. One earlier packaging run of the same app sources produced a
+different hash; the cause was not identified. Reproducibility **across machines has not been verified**;
+see ROADMAP.md.
 
 ## Project layout
 
