@@ -35,6 +35,10 @@ Recordings, keys and the database are excluded from Android cloud backup.
 | Physical activity | Only when you add an activity rule | Step detection for automation |
 | Usage access (system setting) | Only when you add an "app in use" rule | Detect the foreground app |
 
+Two install-time permissions are added by a library rather than by Auralynx's own code:
+`WAKE_LOCK` and `RECEIVE_BOOT_COMPLETED` come from AndroidX WorkManager, which the Glance home-screen
+widget uses to schedule widget refreshes. They grant no access to personal data.
+
 ## Network
 
 The only network use is **optional cloud translation**, off by default. If you enable it, the text
