@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Auralynx</string>
+    <string name="tagline">Beyond Bluetooth. Beyond Boundaries.</string>
+    <string name="tile_noise_control">Noise control</string>
+    <string name="tile_automation">Smart automation</string>
+    <string name="widget_battery">Accessory battery</string>
+    <string name="widget_description">Most recent battery values reported by your accessory</string>
+    <string name="shortcut_battery">Battery</string>
+    <string name="shortcut_noise">Noise control</string>
+    <string name="shortcut_automation">Automation</string>
+    <string name="shortcut_finder">Find accessory</string>
+</resources>

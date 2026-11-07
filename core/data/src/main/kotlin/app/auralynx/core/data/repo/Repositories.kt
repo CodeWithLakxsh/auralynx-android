@@ -111,6 +111,8 @@ class BatteryRepository @Inject constructor(private val db: AuralynxDatabase, pr
 
     fun observe(address: String, sinceMillis: Long): Flow<List<BatterySampleEntity>> = db.battery().observe(address, sinceMillis)
 
+    suspend fun latest(address: String, component: String): BatterySampleEntity? = db.battery().latest(address, component)
+
     private fun precision(source: String) =
         app.auralynx.core.protocol.model.MeasurementSource.entries.firstOrNull { it.name == source }?.precisionPercent ?: 10
 

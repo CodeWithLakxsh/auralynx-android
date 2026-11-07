@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Secrets (Keystore-encrypted keys), recordings and diagnostics never leave the device. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="auralynx_secrets.xml" />
+        <exclude domain="file" path="recordings" />
+        <exclude domain="database" path="auralynx.db" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="auralynx_secrets.xml" />
+        <exclude domain="file" path="recordings" />
+    </device-transfer>
+</data-extraction-rules>
