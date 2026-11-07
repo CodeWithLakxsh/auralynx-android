@@ -2,7 +2,6 @@ package app.auralynx.core.bluetooth
 
 import app.auralynx.core.bluetooth.aap.AapSession
 import app.auralynx.core.common.FailureReason
-import app.auralynx.core.common.Hex
 import app.auralynx.core.common.Outcome
 import app.auralynx.core.common.toHex
 import app.auralynx.core.protocol.aap.AapCommands
@@ -99,6 +98,5 @@ class AapSessionTest {
         assertTrue(s.isOpen.value)
         assertEquals(true, s.state.value.conversationAwareness)
         assertEquals(2, s.state.value.packetsReceived)
-        @Suppress("UNUSED_VARIABLE") val unused = Hex
     }
 }
