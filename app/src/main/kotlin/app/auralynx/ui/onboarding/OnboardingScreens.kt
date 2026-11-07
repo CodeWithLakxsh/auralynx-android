@@ -48,9 +48,9 @@ private val pages = listOf(
         "Open source, private by design",
     )),
     Page("What works on your phone", "Auralynx never needs root, Shizuku or ADB.", listOf(
-        "Every Android 8+ phone: battery and ear status from the accessory's Bluetooth advertisements (10 % steps).",
-        "Android 17 (and some Android 16 builds): Apple's accessory channel through public APIs, for noise control, conversation awareness and 1 % battery.",
-        "Some features (loud sound reduction, hearing assistance) need root on every phone and are not offered.",
+        "Every Android 8+ phone: battery, charging and ear status from the accessory's Bluetooth advertisements (10 % steps), connection history, alerts, automation, EQ, recorder and translation.",
+        "Noise-control switching needs Apple's accessory channel. Android does not yet offer apps a public API for it, so Auralynx shows these controls as unavailable instead of pretending. It checks again after every OS update.",
+        "Auralynx never uses hidden system APIs or modifies the Bluetooth stack.",
     )),
     Page("Your data stays here", "No account, no analytics, no ads.", listOf(
         "History and settings are stored only on this phone.",

@@ -57,6 +57,7 @@ class ChannelExperiment @Inject constructor(
         "build_id" to Build.ID,
         "security_patch" to Build.VERSION.SECURITY_PATCH,
         "transport_os_support" to transport.osSupport().name,
+        "transport_probe" to transport.supportDetail(),
     )
 
     /** Runs the experiment against an accessory that is already connected over A2DP/HFP. */

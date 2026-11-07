@@ -104,7 +104,7 @@ fun BatteryScreen(vm: BatteryViewModel) {
             }
             SectionHeader("Discharge")
             AuralynxCard {
-                Row { EstimateLabel("Calculated estimate") }
+                Row { EstimateLabel(text = "Calculated estimate") }
                 ui.estimates.forEach { (c, e) ->
                     val name = componentName(app.auralynx.core.protocol.model.BatteryComponent.valueOf(c))
                     if (e == null) Text("$name: not enough data yet (needs 3+ readings over 10+ minutes of use)", style = MaterialTheme.typography.bodyMedium)

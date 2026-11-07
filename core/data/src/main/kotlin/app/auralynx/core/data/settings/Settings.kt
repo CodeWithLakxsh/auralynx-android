@@ -23,7 +23,8 @@ enum class ThemeMode { SYSTEM, LIGHT, DARK }
 data class AppSettings(
     val onboardingComplete: Boolean = false,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
-    val dynamicColor: Boolean = true,
+    /** Off by default so the Auralynx palette is shown; Material You is opt-in. */
+    val dynamicColor: Boolean = false,
     val accessoryChannelEnabled: Boolean = true,
     val experimentalEnabled: Boolean = false,
     val autoPauseOnEarRemoval: Boolean = true,
@@ -145,7 +146,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext context: Contex
     private fun currentFrom(p: Preferences): AppSettings = AppSettings(
         onboardingComplete = p[K.onboarding] ?: false,
         themeMode = p[K.theme]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.SYSTEM,
-        dynamicColor = p[K.dynamic] ?: true,
+        dynamicColor = p[K.dynamic] ?: false,
         accessoryChannelEnabled = p[K.channel] ?: true,
         experimentalEnabled = p[K.experimental] ?: false,
         autoPauseOnEarRemoval = p[K.autoPause] ?: true,

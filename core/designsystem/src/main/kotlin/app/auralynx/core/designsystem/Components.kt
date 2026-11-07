@@ -245,7 +245,7 @@ fun LoadingState(label: String, modifier: Modifier = Modifier) {
 
 /** Label that marks a value as a calculated estimate rather than a measurement. */
 @Composable
-fun EstimateLabel(text: String = "Estimate", modifier: Modifier = Modifier) {
+fun EstimateLabel(modifier: Modifier = Modifier, text: String = "Estimate") {
     Surface(modifier, shape = RoundedCornerShape(6.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
         Text(text, Modifier.padding(horizontal = 6.dp, vertical = 2.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSecondaryContainer)
     }

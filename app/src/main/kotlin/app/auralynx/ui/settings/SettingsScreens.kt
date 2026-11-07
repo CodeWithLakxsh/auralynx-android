@@ -68,7 +68,7 @@ fun SettingsScreen(vm: SettingsViewModel) {
         SectionHeader("Accessory")
         AuralynxCard {
             SettingSwitch("Accessory channel", st.accessoryChannelEnabled, { v -> vm.update { it.copy(accessoryChannelEnabled = v) } },
-                supporting = "Apple's accessory protocol, needed for noise control and 1 % battery. Uses only public Android APIs (Android 17+, some Android 16 builds).")
+                supporting = "Apple's accessory protocol for noise control and 1 % battery. Used only if this Android version offers a public API for it (none does yet).")
             SettingSwitch("Pause when an earbud is removed", st.autoPauseOnEarRemoval, { v -> vm.update { it.copy(autoPauseOnEarRemoval = v) } })
             SettingSwitch("Resume when it is put back", st.autoResumeOnEarInsert, { v -> vm.update { it.copy(autoResumeOnEarInsert = v) } })
         }
@@ -91,7 +91,7 @@ fun SettingsScreen(vm: SettingsViewModel) {
 fun AboutScreen() {
     ScreenColumn {
         Text("Auralynx", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(top = Tokens.lg))
-        Text("Beyond Bluetooth. Beyond Boundaries.", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.secondary)
+        Text(androidx.compose.ui.res.stringResource(app.auralynx.R.string.tagline), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.secondary)
         Text("Version ${BuildConfig.VERSION_NAME}. Experimental release: hardware validation is incomplete.", style = MaterialTheme.typography.bodyMedium)
         SectionHeader("License")
         AuralynxCard {

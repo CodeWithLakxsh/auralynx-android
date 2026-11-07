@@ -26,7 +26,7 @@ enum class Transport {
     /** Public BLE scanning of proximity advertisements. Works without root on all devices. */
     BLE_ADVERTISEMENT,
 
-    /** Proprietary AAP channel over classic L2CAP (public API on Android 17+ only). */
+    /** Proprietary AAP channel over classic L2CAP. Not exposed by any public Android API as of API 37. */
     ACCESSORY_CHANNEL,
 }
 

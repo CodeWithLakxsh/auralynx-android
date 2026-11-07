@@ -1,7 +1,7 @@
 package app.auralynx
 
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
         fun shortcut(id: String, label: String, icon: Int) = ShortcutInfoCompat.Builder(this, id)
             .setShortLabel(label)
             .setIcon(IconCompat.createWithResource(this, icon))
-            .setIntent(Intent(Intent.ACTION_VIEW, Uri.parse("auralynx://$id"), this, MainActivity::class.java))
+            .setIntent(Intent(Intent.ACTION_VIEW, "auralynx://$id".toUri(), this, MainActivity::class.java))
             .build()
         runCatching {
             ShortcutManagerCompat.setDynamicShortcuts(this, listOf(

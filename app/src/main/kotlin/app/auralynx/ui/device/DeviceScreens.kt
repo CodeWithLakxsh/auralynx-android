@@ -233,7 +233,7 @@ fun AirPodsMaxScreen(vm: DeviceViewModel, onNavigate: (Route) -> Unit) {
             val total = sessions.sumOf { (it.endMillis ?: now) - it.startMillis } / 60_000
             val loud = sessions.sumOf { it.highVolumeSeconds } / 60
             Text("$total min listening", style = MaterialTheme.typography.titleLarge)
-            Row { EstimateLabel("Volume-based estimate") }
+            Row { EstimateLabel(text = "Volume-based estimate") }
             Text("$loud min with media volume at 80 % or higher", style = MaterialTheme.typography.bodyMedium)
             InfoNote("Exposure is estimated from Android's media volume, not measured sound pressure. Auralynx cannot read decibel levels from the headphones.")
         }

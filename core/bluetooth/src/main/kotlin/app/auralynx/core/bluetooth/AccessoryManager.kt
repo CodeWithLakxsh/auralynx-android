@@ -156,7 +156,7 @@ class AccessoryManager @Inject constructor(
             setStatus(address, ChannelStatus.DisabledByUser); return
         }
         if (transport.osSupport() == AapTransport.OsSupport.UNSUPPORTED) {
-            setStatus(address, ChannelStatus.OsUnsupported("Requires Android 17, or an Android 16 build that exposes classic L2CAP sockets"))
+            setStatus(address, ChannelStatus.OsUnsupported("Android does not yet let apps open this accessory channel with public APIs"))
             return
         }
         connectJobs[address] = scope.launch {

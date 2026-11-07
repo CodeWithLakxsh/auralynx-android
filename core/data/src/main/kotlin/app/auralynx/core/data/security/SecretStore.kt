@@ -4,6 +4,7 @@ import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -29,7 +30,7 @@ class SecretStore @Inject constructor(@ApplicationContext context: Context) {
         cipher.init(Cipher.ENCRYPT_MODE, key())
         val encrypted = cipher.doFinal(value)
         val blob = cipher.iv + encrypted
-        prefs.edit().putString(name, Base64.encodeToString(blob, Base64.NO_WRAP)).apply()
+        prefs.edit { putString(name, Base64.encodeToString(blob, Base64.NO_WRAP)) }
     }
 
     fun get(name: String): ByteArray? {
@@ -44,10 +45,10 @@ class SecretStore @Inject constructor(@ApplicationContext context: Context) {
     fun putString(name: String, value: String) = put(name, value.encodeToByteArray())
     fun getString(name: String): String? = get(name)?.decodeToString()
 
-    fun remove(name: String) = prefs.edit().remove(name).apply()
+    fun remove(name: String) = prefs.edit { remove(name) }
 
     fun clear() {
-        prefs.edit().clear().apply()
+        prefs.edit { clear() }
         runCatching { KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }.deleteEntry(KEY_ALIAS) }
     }
 

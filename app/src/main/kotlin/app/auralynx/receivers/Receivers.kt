@@ -22,7 +22,17 @@ import javax.inject.Inject
 class BluetoothEventReceiver : BroadcastReceiver() {
     @Inject lateinit var coordinator: AccessoryCoordinator
     override fun onReceive(context: Context, intent: Intent) {
+        // Only act on the system broadcasts declared in the manifest.
+        if (intent.action !in HANDLED) return
         coordinator.start()
+    }
+
+    private companion object {
+        val HANDLED = setOf(
+            android.bluetooth.BluetoothDevice.ACTION_ACL_CONNECTED,
+            android.bluetooth.BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED,
+            android.bluetooth.BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED,
+        )
     }
 }
 

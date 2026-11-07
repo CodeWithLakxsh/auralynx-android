@@ -11,7 +11,7 @@ interface AapConnection {
 
 /** Why the AAP channel could not be opened. Surfaced verbatim in the UI and diagnostics. */
 sealed class ChannelError(message: String) : Exception(message) {
-    /** Android < 16, or Android 16 builds that reject classic L2CAP socket settings. */
+    /** The public SDK on this OS does not allow apps to open a classic L2CAP channel. */
     class OsUnsupported(detail: String) : ChannelError(detail)
     class PermissionMissing : ChannelError("BLUETOOTH_CONNECT permission not granted")
     /** The accessory refused or did not answer (common when the phone's stack lacks the upstream fix). */
@@ -25,6 +25,9 @@ interface AapTransport {
     fun osSupport(): OsSupport
 
     suspend fun connect(address: String): AapConnection
+
+    /** Human-readable explanation of [osSupport], for diagnostics and research reports. */
+    fun supportDetail(): String = osSupport().name
 
     enum class OsSupport { SUPPORTED, UNSUPPORTED, UNKNOWN_UNTIL_ATTEMPTED }
 }

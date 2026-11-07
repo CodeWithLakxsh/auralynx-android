@@ -4,6 +4,7 @@ import android.media.audiofx.AudioEffect
 import android.media.audiofx.DynamicsProcessing
 import android.media.audiofx.Equalizer
 import android.os.Build
+import androidx.annotation.RequiresApi
 import app.auralynx.core.common.Diag
 import app.auralynx.core.dsp.GraphicEqualizer
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,7 +57,7 @@ class SessionEffectsController @Inject constructor() {
         effects[sessionId] = effect
         apply(effect)
         runCatching { effect.enabled = enabled }
-        _sessions.update { it + ExternalSession(sessionId, packageName, if (effect is DynamicsProcessing) "DynamicsProcessing" else "Equalizer") }
+        _sessions.update { it + ExternalSession(sessionId, packageName, if (Build.VERSION.SDK_INT >= 28 && effect is DynamicsProcessing) "DynamicsProcessing" else "Equalizer") }
     }
 
     fun onSessionClosed(sessionId: Int) {
@@ -68,31 +69,22 @@ class SessionEffectsController @Inject constructor() {
         effects.keys.toList().forEach { onSessionClosed(it) }
     }
 
-    private fun create(sessionId: Int): AudioEffect = if (Build.VERSION.SDK_INT >= 28) {
+    private fun create(sessionId: Int): AudioEffect = if (Build.VERSION.SDK_INT >= 28) createDynamics(sessionId) else Equalizer(0, sessionId)
+
+    @RequiresApi(28)
+    private fun createDynamics(sessionId: Int): AudioEffect {
         val cfg = DynamicsProcessing.Config.Builder(
             DynamicsProcessing.VARIANT_FAVOR_FREQUENCY_RESOLUTION, 2,
             true, BANDS, false, 0, false, 0, true,
         ).build()
-        DynamicsProcessing(0, sessionId, cfg)
-    } else {
-        Equalizer(0, sessionId)
+        return DynamicsProcessing(0, sessionId, cfg)
     }
 
     private fun apply(effect: AudioEffect) {
         runCatching {
-            when (effect) {
-                is DynamicsProcessing -> {
-                    val centres = GraphicEqualizer.BANDS
-                    val eq = DynamicsProcessing.Eq(true, true, BANDS)
-                    for (i in 0 until BANDS) {
-                        // Band i covers up to the geometric midpoint between centre i and i+1.
-                        val cutoff = if (i < BANDS - 1) sqrt(centres[i] * centres[i + 1]) else 20_000.0
-                        eq.setBand(i, DynamicsProcessing.EqBand(true, cutoff.toFloat(), (gains[i] + preamp).toFloat()))
-                    }
-                    effect.setPreEqAllChannelsTo(eq)
-                    effect.setLimiterAllChannelsTo(DynamicsProcessing.Limiter(true, true, 0, 1f, 60f, 10f, -1f, 0f))
-                }
-                is Equalizer -> {
+            when {
+                Build.VERSION.SDK_INT >= 28 && effect is DynamicsProcessing -> applyDynamics(effect)
+                effect is Equalizer -> {
                     val range = effect.bandLevelRange // millibels
                     for (b in 0 until effect.numberOfBands) {
                         val centreHz = effect.getCenterFreq(b.toShort()) / 1000.0
@@ -103,6 +95,19 @@ class SessionEffectsController @Inject constructor() {
                 }
             }
         }.onFailure { Diag.w(TAG, it) { "Applying EQ failed" } }
+    }
+
+    @RequiresApi(28)
+    private fun applyDynamics(effect: DynamicsProcessing) {
+        val centres = GraphicEqualizer.BANDS
+        val eq = DynamicsProcessing.Eq(true, true, BANDS)
+        for (i in 0 until BANDS) {
+            // Band i covers up to the geometric midpoint between centre i and i+1.
+            val cutoff = if (i < BANDS - 1) sqrt(centres[i] * centres[i + 1]) else 20_000.0
+            eq.setBand(i, DynamicsProcessing.EqBand(true, cutoff.toFloat(), (gains[i] + preamp).toFloat()))
+        }
+        effect.setPreEqAllChannelsTo(eq)
+        effect.setLimiterAllChannelsTo(DynamicsProcessing.Limiter(true, true, 0, 1f, 60f, 10f, -1f, 0f))
     }
 
     companion object {

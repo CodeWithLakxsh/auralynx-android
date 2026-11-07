@@ -50,8 +50,8 @@ fun FeatureSupport.label(): SupportLabel = when (this) {
         },
     )
     is FeatureSupport.NeedsAccessoryChannel -> when (reason) {
-        ChannelUnavailableReason.OS_UNSUPPORTED -> SupportLabel("Needs Android 17", StatusKind.LIMITED,
-            "Uses Apple's accessory protocol. Android lets apps open that channel from Android 17 (and some Android 16 builds).")
+        ChannelUnavailableReason.OS_UNSUPPORTED -> SupportLabel("Not available on Android", StatusKind.UNAVAILABLE,
+            "Uses Apple's accessory protocol over a classic Bluetooth L2CAP channel. Android does not offer apps a public API for that channel yet; Auralynx re-checks automatically after OS updates.")
         ChannelUnavailableReason.NOT_CONNECTED -> SupportLabel("Not connected", StatusKind.LIMITED, "Waiting for the accessory channel.")
         ChannelUnavailableReason.DISABLED_BY_USER -> SupportLabel("Turned off", StatusKind.UNAVAILABLE, "The accessory channel is disabled in Settings.")
     }
@@ -65,7 +65,7 @@ fun ChannelStatus.label(): SupportLabel = when (this) {
     ChannelStatus.Connected -> SupportLabel("Accessory channel connected", StatusKind.LIVE, null)
     is ChannelStatus.Connecting -> SupportLabel("Connecting…", StatusKind.LIMITED, "Attempt $attempt")
     ChannelStatus.DisabledByUser -> SupportLabel("Accessory channel off", StatusKind.UNAVAILABLE, "Enable it in Settings to use controls.")
-    is ChannelStatus.OsUnsupported -> SupportLabel("Basic mode", StatusKind.LIMITED, detail)
+    is ChannelStatus.OsUnsupported -> SupportLabel("Rootless mode", StatusKind.LIMITED, "Battery and wear status come from Bluetooth advertisements. " + detail)
     is ChannelStatus.Failed -> SupportLabel(if (nextRetryAtMillis != null) "Retrying" else "Channel unavailable", StatusKind.LIMITED, reason)
     ChannelStatus.Idle -> SupportLabel("Standard Bluetooth", StatusKind.LIMITED, null)
 }

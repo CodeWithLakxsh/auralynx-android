@@ -1,7 +1,7 @@
 package app.auralynx.ui.finder
 
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -94,7 +94,7 @@ fun FinderScreen(vm: FinderViewModel) {
                 if (d.lastLatitude != null && d.lastLongitude != null) {
                     Text("Phone location at disconnect: ±${d.lastLocationAccuracyMeters?.toInt() ?: "?"} m, ${formatTime(d.lastLocationMillis)}")
                     Button(onClick = {
-                        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("geo:${d.lastLatitude},${d.lastLongitude}?q=${d.lastLatitude},${d.lastLongitude}(Last seen)"))) }
+                        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, ("geo:${d.lastLatitude},${d.lastLongitude}?q=${d.lastLatitude},${d.lastLongitude}(Last seen)").toUri())) }
                     }) { Text("Open in maps") }
                 } else InfoNote("Location at disconnect is off. Enable it in Settings → Privacy (needs location permission).")
             }

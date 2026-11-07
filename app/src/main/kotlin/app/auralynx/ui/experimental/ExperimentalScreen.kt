@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -122,6 +123,7 @@ fun ExperimentalScreen(vm: ExperimentalViewModel) {
     DisposableEffect(Unit) { onDispose { vm.stopScan() } }
     ScreenColumn {
         ExperimentalBanner("Research features. They may not work on your phone or accessory, and nothing here is presented as a supported feature until it has been validated on real hardware.")
+        androidx.compose.foundation.layout.Spacer(androidx.compose.ui.Modifier.height(Tokens.md))
         AuralynxCard { SettingSwitch("Enable experimental features", s?.experimentalEnabled == true, vm::setExperimental) }
 
         SectionHeader("Rootless accessory-channel experiment")

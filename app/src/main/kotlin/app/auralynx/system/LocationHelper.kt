@@ -36,7 +36,11 @@ class LocationHelper @Inject constructor(@ApplicationContext private val context
     @SuppressLint("MissingPermission")
     suspend fun currentLocation(timeoutMillis: Long = 15_000): Location? {
         if (!hasPermission()) return null
-        val provider = listOf(LocationManager.FUSED_PROVIDER, LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER)
+        val candidates = buildList {
+            if (Build.VERSION.SDK_INT >= 31) add(LocationManager.FUSED_PROVIDER)
+            add(LocationManager.NETWORK_PROVIDER); add(LocationManager.GPS_PROVIDER)
+        }
+        val provider = candidates
             .firstOrNull { runCatching { lm.isProviderEnabled(it) }.getOrDefault(false) } ?: return lastKnown()
         if (Build.VERSION.SDK_INT < 30) return lastKnown()
         return withTimeoutOrNull(timeoutMillis) {

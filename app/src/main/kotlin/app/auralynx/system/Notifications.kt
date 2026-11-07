@@ -22,7 +22,6 @@ import javax.inject.Singleton
 class Notifications @Inject constructor(@ApplicationContext private val context: Context) {
 
     fun createChannels() {
-        if (Build.VERSION.SDK_INT < 26) return
         val nm = context.getSystemService(NotificationManager::class.java)
         nm.createNotificationChannels(listOf(
             NotificationChannel(CH_MONITOR, "Accessory status", NotificationManager.IMPORTANCE_LOW).apply {
