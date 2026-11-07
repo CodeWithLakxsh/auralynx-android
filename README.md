@@ -67,7 +67,7 @@ accessory settings are shown as unavailable, with the reason**, rather than as b
 | Apple Watch research | Research only | Passive Continuity observer; **no pairing**. See [research](docs/research/APPLE_WATCH.md). |
 | Head tracking | Experimental | Raw data + manual calibration; needs the accessory channel |
 
-Full matrix: [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md).
+Full matrix: [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md). Validation summary: [docs/VALIDATION_REPORT.md](docs/VALIDATION_REPORT.md).
 
 ## Screenshots
 
