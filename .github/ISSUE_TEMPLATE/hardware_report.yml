@@ -1,0 +1,18 @@
+name: Hardware validation report
+description: Report what works (or not) with your phone and accessory
+labels: [hardware-validation]
+body:
+  - type: markdown
+    attributes: { value: "Follow docs/DEVICE_TESTING_CHECKLIST.md. Please attach the JSON from Experimental → Run experiment." }
+  - type: input
+    id: phone
+    attributes: { label: Phone, Android version and build ID }
+    validations: { required: true }
+  - type: input
+    id: accessory
+    attributes: { label: Accessory model number (e.g. A3048) and firmware }
+    validations: { required: true }
+  - type: textarea
+    id: results
+    attributes: { label: Checklist results }
+    validations: { required: true }

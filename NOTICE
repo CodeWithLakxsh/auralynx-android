@@ -1,0 +1,40 @@
+Auralynx
+Copyright (C) 2026 The Auralynx contributors
+
+This program is free software: you can redistribute it and/or modify it under the terms of the
+GNU General Public License as published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License for more details. You should have received a copy of the GNU General
+Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+Provenance
+----------
+All source code in this repository was written for Auralynx. No source files were copied from
+other projects. Knowledge of the Apple Accessory Protocol (AAP) and of Apple Continuity / Proximity
+Pairing advertisement formats was obtained from public documentation and source code published by
+the projects listed below (all GPL-3.0). Protocol facts (byte layouts, constants) are not
+expressive works, but these projects are credited because Auralynx would not exist without their
+reverse-engineering effort:
+
+  - LibrePods (https://github.com/kavishdevar/librepods), GPL-3.0, Kavish Devar and contributors:
+    "AAP Definitions", opcode and control-command documentation, per-model capability table.
+  - CAPod (https://github.com/d4rken-org/capod), GPL-3.0, Matthias Urhahn (d4rken) and contributors:
+    proximity pairing payload layout, model codes, key-exchange and encrypted battery layout.
+  - OpenPods (https://github.com/adolfintel/OpenPods), GPL-3.0, Federico Dossena: early BLE status research.
+  - apple-wireshark (https://github.com/pabloaul/apple-wireshark): AAP/Continuity dissector.
+
+Academic sources: Martin et al., "Handoff All Your Privacy", PoPETs 2019; Celosia and Cunche,
+"Discontinued Privacy", PoPETs 2020; Brown and Duda, "A Structural Model for Binaural Sound
+Synthesis", IEEE TSAP 1998; R. Bristow-Johnson, "Cookbook formulae for audio EQ biquad filter
+coefficients"; Bluetooth Core Specification v5.x, Vol 3 Part H (RPA resolution test vectors).
+
+Trademarks
+----------
+Auralynx is not affiliated with Apple Inc. AirPods, AirPods Pro, AirPods Max, Apple Watch, Beats and
+Find My are trademarks of Apple Inc., used only to describe compatibility. No Apple artwork, icons
+or UI assets are included.
+
+Third-party libraries are listed in THIRD_PARTY_NOTICES.md and docs/DEPENDENCY_LICENSES.md.
