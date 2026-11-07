@@ -33,6 +33,7 @@ room {
 dependencies {
     api(project(":core:protocol"))
     api(project(":core:automation"))
+    api(project(":core:dsp"))
     api(libs.androidx.datastore.preferences)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

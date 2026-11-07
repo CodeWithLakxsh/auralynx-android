@@ -86,7 +86,9 @@ enum class AccessoryModel(
             val n = name?.lowercase() ?: return null
             return when {
                 "airpods max" in n -> AIRPODS_MAX
-                "airpods pro" in n -> AIRPODS_PRO_2
+                // Conservative: the name alone cannot tell Pro generations apart, so assume the
+                // smaller feature set until device information or BLE identifies the exact model.
+                "airpods pro" in n -> AIRPODS_PRO
                 "airpods" in n -> AIRPODS_2
                 "beats" in n || "powerbeats" in n -> UNKNOWN
                 else -> null
