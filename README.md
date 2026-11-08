@@ -14,9 +14,9 @@ no account, no analytics.
 </div>
 
 > [!IMPORTANT]
-> **Experimental alpha (v0.1.0-alpha).** Auralynx has been built and tested on emulators and with
-> protocol-level unit tests. **It has not yet been validated with physical AirPods or Beats hardware.**
-> See [Hardware validation status](#hardware-validation-status).
+> **Experimental alpha (v0.1.0-alpha).** First hardware test: OnePlus Pad 3 (Android 16) with
+> AirPods Pro 2 (USB-C). Detection, battery, wear status and ear-based auto-pause work; accessory
+> controls are blocked on stock Android. See [the real-device test report](docs/REAL_DEVICE_TEST_REPORT.md).
 
 > [!NOTE]
 > Auralynx is an independent project. It is not affiliated with, endorsed by or sponsored by Apple Inc.
@@ -52,13 +52,13 @@ accessory settings are shown as unavailable, with the reason**, rather than as b
 | Device dashboard with capability registry | Implemented | Every feature shows *why* it is or is not available |
 | Battery monitoring and analytics | Implemented | Real samples only, precision shown per value; discharge estimates labelled as estimates; no battery-health numbers |
 | Low-battery, fully-charged and unexpected-disconnect alerts | Implemented | Opt-in where privacy-relevant |
-| Ear detection → auto pause/resume | Implemented | Needs ear-detection data from the accessory channel |
+| Ear detection → auto pause/resume | Implemented | Uses BLE advertisements rootlessly: primary bud ≈ 1–3 s, secondary bud slower (accessory-side timing) |
 | Noise control, conversation awareness, adaptive level, long-press cycle, rename | Implemented, **not operable on stock Android** | Requires the accessory channel (see above) |
 | Smart automation (time, place, Wi-Fi, accessory, app, activity, profile) | Implemented | Priority + specificity conflict resolution, manual override, history, permission-on-demand, no polling |
 | Equalizer (10-band, 7 presets, custom profiles) | Implemented | Applies to Auralynx playback and to players that publish their audio session. **Not system-wide.** |
 | Spatial audio (crossfeed, virtual speakers, virtual room) | Experimental | App-local player only; generic spherical-head model, **not** Apple Personalized Spatial Audio |
 | Audio recorder (noise reduction, voice enhancement, WAV/AAC export) | Implemented | Own microphone only; headset mic via standard hands-free route |
-| Live translation (speech → translation → speech) | Implemented | System on-device translation (Android 12+, where the phone provides it) or **your own** LibreTranslate server (off by default) |
+| Live translation (speech → translation → speech) | Implemented | System on-device translation where the phone provides it, free MyMemory cloud translation (opt-in, text only), or your own LibreTranslate server |
 | Proximity finder | Implemented | Signal-strength guidance, not distance; last-seen location is opt-in. No Find My network access. |
 | Security & privacy center | Implemented | Permissions, connection history, redacted diagnostic export, delete-all-data |
 | Gesture automation | Implemented, **not operable on stock Android** | Press events come over the accessory channel |
@@ -105,7 +105,7 @@ Verify downloads with `SHA256SUMS` (`shasum -a 256 -c SHA256SUMS`).
 ## Build
 
 ```bash
-git clone https://github.com/<owner>/auralynx-android.git
+git clone https://github.com/CodeWithLakxsh/auralynx-android.git
 cd auralynx-android
 ./gradlew assembleDebug          # app/build/outputs/apk/debug/app-debug.apk
 ./gradlew testDebugUnitTest :core:common:test :core:protocol:test :core:automation:test :core:dsp:test
@@ -128,7 +128,7 @@ configure. Full policy: [PRIVACY.md](PRIVACY.md).
 | Protocol parsing/encoding | Unit-tested against packets published in public protocol documentation |
 | Accessory engine (sessions, recovery, capabilities) | Unit-tested with a scripted fake accessory (not hardware) |
 | Database, UI navigation | Instrumentation-tested on an Android 16 (API 36) emulator |
-| Real AirPods/Beats | **Not yet tested.** Help wanted: [device testing checklist](docs/DEVICE_TESTING_CHECKLIST.md) |
+| Real AirPods/Beats | AirPods Pro 2 (USB-C) on a OnePlus Pad 3: [report](docs/REAL_DEVICE_TEST_REPORT.md). Other models and phones: help wanted ([checklist](docs/DEVICE_TESTING_CHECKLIST.md)) |
 
 ## Contributing
 

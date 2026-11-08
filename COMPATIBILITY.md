@@ -7,8 +7,9 @@ the phone's Bluetooth stack · **Research** = experimental only · — = not off
 "Declared" support comes from public community implementations (LibrePods, CAPod). Auralynx upgrades a
 feature to *observed* only after receiving matching data from your accessory.
 
-**Hardware validation: none of the rows below has been verified by the Auralynx project on physical
-hardware yet** (v0.1.0-alpha).
+**Hardware validation:** only AirPods Pro 2 (USB-C) has been tested, on a OnePlus Pad 3 (Android 16):
+BLE battery, charging and in-ear **verified**; channel features **blocked** (`invalid socketType - 3`).
+See [docs/REAL_DEVICE_TEST_REPORT.md](docs/REAL_DEVICE_TEST_REPORT.md). All other rows are unverified.
 
 ## Accessory features by model
 
@@ -54,11 +55,13 @@ Pro, Max) and need the accessory channel.
 | 8.0–8.1 | 26–27 | Supported (minimum). BLE scanning needs location permission. Not yet tested. |
 | 9–11 | 28–30 | Supported. BLE scanning needs location permission. Not yet tested. |
 | 12–15 | 31–35 | Supported. Not yet tested on hardware. |
-| 16 | 36 | Supported. Emulator-tested (unit/UI/database tests, manual walkthrough). |
+| 16 | 36 | Supported. Emulator-tested; hardware-tested on OnePlus Pad 3 (OxygenOS 16). |
 | 17 | 37 | Compiles against API 37; target API 36. Accessory channel still unavailable (public API rejects classic L2CAP). |
 
 ## Phone manufacturers
 
-Not yet tested. Known factors that may differ: aggressive background restrictions (Xiaomi, Huawei,
+Tested: **OnePlus Pad 3 (OxygenOS 16)**. Observed there: Bluetooth broadcasts come from the
+Bluetooth process (UID 1002), hardware BLE batching flushes only every ~30 s, and ADB touch injection
+needs "Disable permission monitoring". Other manufacturers are untested. Known factors that may differ: aggressive background restrictions (Xiaomi, Huawei,
 some Samsung builds) affect the monitoring service; some vendors' system Bluetooth stacks report HFP
 battery differently. Please report results with the hardware issue template.

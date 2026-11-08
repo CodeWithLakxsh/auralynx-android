@@ -3,6 +3,21 @@
 All notable changes to this project are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning: [Semantic Versioning](https://semver.org/) with pre-release labels.
 
+## [Unreleased]
+
+### Added
+- Free cloud translation through the public MyMemory API (opt-in; text only; no key, account or server).
+- Advertisement-based ear detection driving auto-pause/resume (debounced).
+
+### Fixed (found on OnePlus Pad 3 + AirPods Pro 2 USB-C; see docs/REAL_DEVICE_TEST_REPORT.md)
+- Connected accessories not detected: Bluetooth stack broadcasts were never received; proxies now reconciled.
+- Advertisements rejected when the model was only guessed from the name; guesses no longer persisted.
+- Battery capability claimed without a value; duplicate connection events; invalid RSSI handling.
+- Hardware-batched background scans (30 s delay); faster scanning while media plays.
+- Genuine weak frames from an already matched advertiser dropped.
+- Automation retried and logged failed actions repeatedly and re-evaluated on every advertisement.
+- Tablet layout width; onboarding and translation wording.
+
 ## [0.1.0-alpha] - 2026-11-07
 
 First development release. **Experimental: not yet validated with physical accessories.**
