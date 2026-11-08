@@ -32,12 +32,20 @@ class AccessoryManagerTest {
     private val address = "AA:BB:CC:DD:EE:01"
     private val connected = MutableStateFlow<Map<String, ConnectedAccessory>>(emptyMap())
 
+    private val sightings = kotlinx.coroutines.flow.MutableSharedFlow<app.auralynx.core.bluetooth.ble.BleSighting>(extraBufferCapacity = 16)
+
+    private fun sighting(addr: String, rssi: Int, statusHex: String = "2B") = app.auralynx.core.bluetooth.ble.BleSighting(
+        addr, rssi, 0,
+        app.auralynx.core.protocol.ble.ProximityStatus.parse(app.auralynx.core.common.Hex.decode("01 24 20 $statusHex 99 8F 12 00 05"))!!,
+        app.auralynx.core.protocol.devices.AccessoryModel.AIRPODS_PRO_2_USBC, null,
+    )
+
     private fun TestScope.manager(transport: FakeTransport): AccessoryManager {
         val system = mockk<SystemBluetoothMonitor>(relaxed = true) {
             every { this@mockk.connected } returns this@AccessoryManagerTest.connected
             every { adapterEnabled } returns MutableStateFlow(true)
         }
-        val scanner = mockk<ProximityScanner> { every { proximity(any()) } returns emptyFlow() }
+        val scanner = mockk<ProximityScanner> { every { proximity(any()) } returns sightings }
         return AccessoryManager(system, transport, scanner, Clock { currentTime }, backgroundScope).also { it.start() }
     }
 
@@ -87,6 +95,18 @@ class AccessoryManagerTest {
         }
         assertEquals(11, transport.attempts)
         assertEquals(ChannelStatus.Connected, m.accessories.value.single().channel)
+    }
+
+    @Test fun weakFramesAreTrustedOnlyFromAnAddressAlreadyMatchedStrongly() = runTest {
+        val m = manager(FakeTransport(support = AapTransport.OsSupport.UNSUPPORTED))
+        connect("Laksh's AirPods Pro"); runCurrent()
+        sightings.emit(sighting("4A:00:00:00:00:01", -80)); runCurrent()
+        assertEquals("unknown weak advertiser is not attributed", null, m.accessories.value.single().ble)
+        sightings.emit(sighting("4A:00:00:00:00:02", -55)); runCurrent()
+        sightings.emit(sighting("4A:00:00:00:00:02", -80, statusHex = "23")); runCurrent()
+        val ble = m.accessories.value.single().ble!!
+        assertEquals(-80, ble.sighting.rssi)
+        assertEquals(false, ble.sighting.status.rightInEar)
     }
 
     @Test fun givesUpAfterBoundedRetries() = runTest {

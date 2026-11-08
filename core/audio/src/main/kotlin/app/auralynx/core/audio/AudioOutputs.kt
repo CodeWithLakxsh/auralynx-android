@@ -45,6 +45,19 @@ class AudioOutputs @Inject constructor(@ApplicationContext private val context: 
         awaitClose { context.contentResolver.unregisterContentObserver(observer) }
     }.distinctUntilChanged()
 
+    /** Whether any app is playing media, from AudioManager's playback callback (event-driven, no polling). */
+    fun mediaPlaying(): Flow<Boolean> = callbackFlow {
+        fun active(configs: List<android.media.AudioPlaybackConfiguration>) = configs.any {
+            it.audioAttributes.usage == android.media.AudioAttributes.USAGE_MEDIA || it.audioAttributes.usage == android.media.AudioAttributes.USAGE_GAME
+        }
+        trySend(active(am.activePlaybackConfigurations))
+        val cb = object : AudioManager.AudioPlaybackCallback() {
+            override fun onPlaybackConfigChanged(configs: MutableList<android.media.AudioPlaybackConfiguration>) { trySend(active(configs)) }
+        }
+        am.registerAudioPlaybackCallback(cb, Handler(Looper.getMainLooper()))
+        awaitClose { am.unregisterAudioPlaybackCallback(cb) }
+    }.distinctUntilChanged()
+
     fun platformSpatializer(): PlatformSpatializerInfo {
         if (Build.VERSION.SDK_INT < 32) return PlatformSpatializerInfo(false, false, false, false, null)
         val s: Spatializer = am.spatializer

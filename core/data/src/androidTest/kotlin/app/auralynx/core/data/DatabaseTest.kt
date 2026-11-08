@@ -91,7 +91,23 @@ class DatabaseTest {
         assertNotNull(d.lastConnectedMillis)
         assertEquals(now, d.lastDisconnectedMillis)
         assertEquals(setOf(Feature.BATTERY, Feature.EAR_DETECTION), DeviceRepository.observedFeatures(d))
-        assertEquals(2, repo.recentEvents.first().size)
+        assertEquals(2, repo.recentEvents.first().size) // CONNECTED then UNEXPECTED_DISCONNECT
+    }
+
+    @Test fun reDiscoveredConnection_isNotRecordedTwice() = runTest {
+        val repo = DeviceRepository(db, clock)
+        repo.recordEvent(addr, "AirPods", ConnectionEventType.CONNECTED)
+        now += 1000; repo.recordEvent(addr, "AirPods", ConnectionEventType.CONNECTED) // app restart
+        now += 1000; repo.recordEvent(addr, "AirPods", ConnectionEventType.DISCONNECTED)
+        now += 1000; repo.recordEvent(addr, "AirPods", ConnectionEventType.CONNECTED)
+        assertEquals(listOf("CONNECTED", "DISCONNECTED", "CONNECTED"), repo.recentEvents.first().reversed().map { it.type })
+    }
+
+    @Test fun guessedModels_areForgotten() = runTest {
+        val repo = DeviceRepository(db, clock)
+        repo.recordSeen(addr, "AirPods Pro", AccessoryModel.AIRPODS_PRO)
+        repo.forgetGuessedModels()
+        assertEquals(null, repo.knownDevices.first().single().model)
     }
 
     @Test fun audioProfiles_seedBuiltInsOnce() = runTest {

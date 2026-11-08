@@ -89,7 +89,7 @@ fun ModelEvidence.label(): String = when (this) {
 
 fun BleMatch.label(): String = when (this) {
     BleMatch.KEY_VERIFIED -> "verified with this accessory's key"
-    BleMatch.PROBABLE -> "probable match (same model nearby)"
+    BleMatch.PROBABLE -> "probable match: the only compatible accessory nearby with a strong signal"
 }
 
 fun formatTime(millis: Long?): String = millis?.let { DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(it)) } ?: "Never"

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -53,7 +54,8 @@ import app.auralynx.ui.common.title
 fun HomeScreen(vm: DeviceViewModel, onNavigate: (app.auralynx.ui.Route) -> Unit) {
     val active by vm.active.collectAsStateWithLifecycle()
     val adapterOn by vm.adapterEnabled.collectAsStateWithLifecycle()
-    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = Tokens.gutter)) {
+    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
+      Column(Modifier.widthIn(max = Tokens.maxContentWidth).fillMaxWidth().padding(horizontal = Tokens.gutter)) {
         Text("Auralynx", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(top = Tokens.lg))
         Spacer(Modifier.height(Tokens.sm))
         when {
@@ -63,6 +65,7 @@ fun HomeScreen(vm: DeviceViewModel, onNavigate: (app.auralynx.ui.Route) -> Unit)
             else -> Dashboard(active!!, vm, onNavigate)
         }
         Spacer(Modifier.height(Tokens.xl))
+      }
     }
 }
 

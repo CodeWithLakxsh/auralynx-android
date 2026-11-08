@@ -79,6 +79,7 @@ class AccessoryCoordinator @Inject constructor(
 
         scope.launch {
             maintenance.applyRetention()
+            devices.forgetGuessedModels()
             audioProfiles.ensureBuiltIns()
             profileApplier.restore()
             listening.closeDangling(clock.nowMillis())
@@ -111,13 +112,15 @@ class AccessoryCoordinator @Inject constructor(
             }
         }
         scope.launch { outputs.mediaVolumeFraction().collect { volumeFraction = it } }
+        scope.launch { outputs.mediaPlaying().collect { playing -> accessories.updateConfig { it.copy(mediaActive = playing) } } }
         automation.start()
     }
 
     private suspend fun onSystemEvent(e: SystemBluetoothEvent) {
         when (e) {
             is SystemBluetoothEvent.Connected -> {
-                devices.recordSeen(e.accessory.address, e.accessory.name, AccessoryModel.guessFromName(e.accessory.name))
+                // Only strong evidence (device information) is persisted as the model; never a name guess.
+                devices.recordSeen(e.accessory.address, e.accessory.name, null)
                 devices.recordEvent(e.accessory.address, e.accessory.name, ConnectionEventType.CONNECTED)
                 lowAlerted.remove(e.accessory.address); chargedAlerted.remove(e.accessory.address)
                 startMonitorService()
@@ -171,7 +174,8 @@ class AccessoryCoordinator @Inject constructor(
 
     /** Ear detection -> auto pause/resume and listening-session analytics. */
     private suspend fun trackListening(state: AccessoryState) {
-        val inEar = state.aap?.budsInEar ?: state.ble?.sighting?.status?.let { (if (it.leftInEar) 1 else 0) + (if (it.rightInEar) 1 else 0) }
+        // Accessory-channel ear events are authoritative; otherwise use the debounced advertisement state.
+        val inEar = state.aap?.budsInEar ?: state.ble?.stableBudsInEar
         val headphones = state.model.isAirPodsMax
         val worn = when {
             inEar != null -> inEar
@@ -181,10 +185,12 @@ class AccessoryCoordinator @Inject constructor(
         val previous = lastInEar.put(state.address, worn)
         if (previous == worn) { accumulateVolume(state.address); return }
         val s = settings.current()
-        if (previous != null && worn < previous && s.autoPauseOnEarRemoval && state.aap?.budsInEar != null && media.isMusicActive) {
+        if (previous != null && worn < previous && s.autoPauseOnEarRemoval && inEar != null && media.isMusicActive) {
             media.pause(); pausedByEarRemoval += state.address
+            Diag.i(TAG) { "Paused media: buds in ear $previous -> $worn (source=${if (state.aap?.budsInEar != null) "accessory channel" else "advertisement"})" }
         } else if (previous != null && worn > previous && s.autoResumeOnEarInsert && pausedByEarRemoval.remove(state.address)) {
             media.play()
+            Diag.i(TAG) { "Resumed media: buds in ear $previous -> $worn" }
         }
         if (worn > 0 && sessionIds[state.address] == null) {
             sessionIds[state.address] = listening.start(state.address, clock.nowMillis())

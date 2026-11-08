@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -43,7 +45,7 @@ private data class Page(val title: String, val body: String, val bullets: List<S
 
 private val pages = listOf(
     Page("Auralynx", "Beyond Bluetooth. Beyond Boundaries.\n\nA companion for AirPods and Beats on Android.", listOf(
-        "Battery, ear detection and noise control",
+        "Battery, charging and in-ear status",
         "Smart automation, equalizer, recorder, live translation",
         "Open source, private by design",
     )),
@@ -63,7 +65,7 @@ private val pages = listOf(
 fun OnboardingScreen(onFinished: () -> Unit) {
     val pager = rememberPagerState { pages.size }
     val scope = rememberCoroutineScope()
-    Column(Modifier.fillMaxSize().padding(Tokens.gutter)) {
+    Column(Modifier.fillMaxSize().wrapContentWidth().widthIn(max = Tokens.maxContentWidth).padding(Tokens.gutter)) {
         HorizontalPager(pager, Modifier.weight(1f)) { i ->
             val p = pages[i]
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) {
@@ -90,7 +92,7 @@ fun PermissionsScreen(onDone: () -> Unit) {
     var refresh by remember { mutableIntStateOf(0) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { refresh++ }
     val essential = BluetoothPermissions.all + if (Build.VERSION.SDK_INT >= 33) listOf(Manifest.permission.POST_NOTIFICATIONS) else emptyList()
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(Tokens.gutter)) {
+    Column(Modifier.fillMaxSize().wrapContentWidth().widthIn(max = Tokens.maxContentWidth).verticalScroll(rememberScrollState()).padding(Tokens.gutter)) {
         Text("Permissions", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(top = Tokens.lg).semantics { heading() })
         Text("Auralynx asks only for what the core features need now. Everything else is requested when you turn on the feature that uses it.",
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)

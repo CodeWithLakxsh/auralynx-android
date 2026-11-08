@@ -22,6 +22,7 @@ import app.auralynx.core.protocol.devices.Feature
 import app.auralynx.core.protocol.model.BatteryReading
 import app.auralynx.core.protocol.model.ChargingState
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -50,8 +51,26 @@ class DeviceRepository @Inject constructor(private val db: AuralynxDatabase, pri
         )
     }
 
+    /**
+     * Earlier builds stored a model guessed from the Bluetooth name. A model persisted without a
+     * model number cannot have come from device information, so it is cleared.
+     */
+    suspend fun forgetGuessedModels() {
+        db.knownDevices().observeAll().first().filter { it.model != null && it.modelNumber == null }
+            .forEach { db.knownDevices().upsert(it.copy(model = null)) }
+    }
+
     suspend fun recordEvent(address: String, name: String?, type: ConnectionEventType, detail: String? = null) {
         val now = clock.nowMillis()
+        // A connection that is merely re-discovered (app restart, Bluetooth service rebind) is not a
+        // new event: only record CONNECTED when the previous event was not already CONNECTED.
+        if (type == ConnectionEventType.CONNECTED) {
+            val last = db.connectionEvents().latest(address)
+            if (last?.type == ConnectionEventType.CONNECTED.name) {
+                db.knownDevices().get(address)?.let { db.knownDevices().upsert(it.copy(lastSeenMillis = now)) }
+                return
+            }
+        }
         db.connectionEvents().insert(ConnectionEventEntity(0, address, name, now, type.name, detail))
         val existing = db.knownDevices().get(address) ?: KnownDeviceEntity(address, name, null, firstSeenMillis = now, lastSeenMillis = now)
         db.knownDevices().upsert(

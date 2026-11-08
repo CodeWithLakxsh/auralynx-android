@@ -166,9 +166,13 @@ fun TranslationScreen(vm: TranslationViewModel) {
                 }
                 PairAvailability.DOWNLOADING -> StatusPill("Downloading language pack", StatusKind.LIMITED)
                 null -> StatusPill("Checking…", StatusKind.LIMITED)
+                PairAvailability.ENGINE_UNAVAILABLE -> {
+                    StatusPill("No translation service", StatusKind.UNAVAILABLE)
+                    InfoNote("This device does not provide Android's system translation service, so on-device translation is unavailable for every language. You can configure your own LibreTranslate server below.")
+                }
                 else -> {
-                    StatusPill("Not available", StatusKind.UNAVAILABLE)
-                    InfoNote("This phone has no on-device translation for this pair. You can configure your own LibreTranslate server below.")
+                    StatusPill("Pair not supported", StatusKind.UNAVAILABLE)
+                    InfoNote("The system translation service does not support this language pair. Try another pair or configure your own LibreTranslate server below.")
                 }
             }
             val s = vm.support

@@ -34,6 +34,9 @@ interface ConnectionEventDao {
     @Query("SELECT * FROM connection_events WHERE deviceAddress = :address ORDER BY timestampMillis DESC LIMIT :limit")
     fun observeForDevice(address: String, limit: Int = 100): Flow<List<ConnectionEventEntity>>
 
+    @Query("SELECT * FROM connection_events WHERE deviceAddress = :address ORDER BY timestampMillis DESC, id DESC LIMIT 1")
+    suspend fun latest(address: String): ConnectionEventEntity?
+
     @Query("DELETE FROM connection_events WHERE timestampMillis < :beforeMillis") suspend fun deleteOlderThan(beforeMillis: Long): Int
     @Query("DELETE FROM connection_events") suspend fun clear()
 }

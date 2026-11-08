@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -56,6 +57,8 @@ data class AccessoryConfig(
     val keys: Map<String, Pair<ByteArray?, ByteArray?>> = emptyMap(),
     /** Whether background BLE monitoring may run (needs scan permission; off when nothing is connected). */
     val bleMonitoring: Boolean = true,
+    /** Faster BLE scanning (BALANCED) while media plays, so advertisement-based ear detection is timely. */
+    val mediaActive: Boolean = false,
 )
 
 /** An event tied to the accessory that produced it. */
@@ -110,8 +113,14 @@ class AccessoryManager @Inject constructor(
         }
         scope.launch {
             // BLE monitoring runs only while at least one accessory is connected and monitoring is allowed.
-            combine(system.connected.map { it.isNotEmpty() }, config.map { it.bleMonitoring }) { any, allowed -> any && allowed }
-                .flatMapLatest { run -> if (run) scanner.proximity(ScanIntensity.LOW_POWER) else emptyFlow() }
+            combine(system.connected.map { it.isNotEmpty() }, config) { any, cfg ->
+                when {
+                    !any || !cfg.bleMonitoring -> null
+                    cfg.mediaActive -> ScanIntensity.BALANCED
+                    else -> ScanIntensity.LOW_POWER
+                }
+            }.distinctUntilChanged()
+                .flatMapLatest { mode -> if (mode != null) scanner.proximity(mode) else emptyFlow() }
                 .collect { onSighting(it) }
         }
         scope.launch {
@@ -218,6 +227,8 @@ class AccessoryManager @Inject constructor(
         sessions.remove(address)?.close()
         sessionStates.update { it - address }
         bleSightings.update { it - address }
+        earDebouncers.remove(address)
+        trustedAdvertisers.values.removeAll { it == address }
         channelStatus.update { if (status == null) it - address else it + (address to status) }
     }
 
@@ -234,16 +245,68 @@ class AccessoryManager @Inject constructor(
         }
         if (keyed != null) {
             val encKey = cfg.keys[keyed.address]?.second
-            bleSightings.update { it + (keyed.address to BleSnapshot(s, BleMatch.KEY_VERIFIED, encKey)) }
+            bleSightings.update { it + (keyed.address to BleSnapshot(s, BleMatch.KEY_VERIFIED, encKey, debounceEar(keyed.address, s))) }
             return
         }
-        // 2) heuristic: single connected accessory of the same model, strong signal
-        val candidates = connected.filter { c ->
-            val model = resolveModel(c, null, null, cfg).first
-            model != AccessoryModel.UNKNOWN && model == s.model && cfg.keys[c.address]?.first == null
+        // 2) heuristic: the single connected accessory compatible with this advertisement, strong signal.
+        //    With strong model evidence (device information / remembered) the exact model must match;
+        //    with only a Bluetooth-name guess the product family must match, because the name cannot
+        //    distinguish generations (e.g. "AirPods Pro" vs "AirPods Pro 2").
+        val sightingModel = s.model
+        val candidates = if (sightingModel == null) emptyList() else connected.filter { c ->
+            if (cfg.keys[c.address]?.first != null) return@filter false
+            val (model, evidence) = resolveModel(c, null, null, cfg)
+            when (evidence) {
+                ModelEvidence.DEVICE_INFORMATION, ModelEvidence.REMEMBERED -> model == sightingModel
+                else -> model.family != AccessoryModel.Family.UNKNOWN && model.family == sightingModel.family
+            }
         }
-        if (candidates.size == 1 && s.rssi >= PROBABLE_MIN_RSSI) {
-            bleSightings.update { it + (candidates.single().address to BleSnapshot(s, BleMatch.PROBABLE)) }
+        // A resolvable private address stays constant until it rotates (~15 min). Once an address was
+        // matched with a strong signal, later frames from it are the same physical device even when
+        // the signal dips (head shadowing, the other bud transmitting). Verified on OnePlus Pad 3,
+        // where genuine frames at -67..-83 dBm were otherwise dropped.
+        val trustedFor = trustedAdvertisers[s.address]
+        val matched = candidates.size == 1 &&
+            (s.rssi >= PROBABLE_MIN_RSSI || trustedFor == candidates.single().address)
+        if (matched && s.rssi >= PROBABLE_MIN_RSSI) trustedAdvertisers[s.address] = candidates.single().address
+        if (matched) {
+            val address = candidates.single().address
+            bleSightings.update { it + (address to BleSnapshot(s, BleMatch.PROBABLE, stableBudsInEar = debounceEar(address, s))) }
+        }
+        logSighting(s, if (matched) "matched (probable)" else "unmatched: candidates=${candidates.size}, rssi=${s.rssi}")
+    }
+
+    private val earDebouncers = ConcurrentHashMap<String, EarStateDebouncer>()
+
+    /** Advertising address -> connected accessory it was matched to with a strong signal. */
+    private val trustedAdvertisers = ConcurrentHashMap<String, String>()
+
+    /** Diagnostic switch: log every advertisement frame instead of only changes. */
+    @Volatile var traceAllSightings: Boolean = false
+
+    private fun debounceEar(address: String, s: BleSighting): Int? {
+        val d = earDebouncers.getOrPut(address) { EarStateDebouncer() }
+        val count = (if (s.status.leftInEar) 1 else 0) + (if (s.status.rightInEar) 1 else 0)
+        if (d.offer(count, s.timeMillis)) Diag.d(TAG) { "BLE ear state for $address is now $count bud(s) in ear" }
+        return d.stable
+    }
+
+    private val lastSightingLog = ConcurrentHashMap<String, Pair<Long, String>>()
+
+    /** One diagnostic line per advertising address every 30 s, or immediately when the status changes. */
+    private fun logSighting(s: BleSighting, result: String) {
+        val now = clock.nowMillis()
+        val st = s.status
+        val signature = "L=${st.leftBattery}${if (st.leftCharging) "+" else ""} R=${st.rightBattery}${if (st.rightCharging) "+" else ""} " +
+            "case=${st.caseBattery} inEar(L=${st.leftInEar},R=${st.rightInEar}) lid=${st.lid} status=0x%02X".format(st.rawStatus)
+        val last = lastSightingLog[s.address]
+        if (!traceAllSightings && last != null && last.second == signature && now - last.first < 30_000) return
+        lastSightingLog[s.address] = now to signature
+        Diag.d(TAG) {
+            "BLE sighting addr=..%s model=0x%04X (%s) rssi=%d %s raw=[%s] -> %s".format(
+                s.address.takeLast(5), st.modelCode, s.model?.name ?: "unknown", s.rssi, signature,
+                s.publicBytes.joinToString(" ") { "%02X".format(it) }, result,
+            )
         }
     }
 
@@ -266,6 +329,7 @@ class AccessoryManager @Inject constructor(
         }
         val transportState = TransportState(
             standardConnected = true,
+            standardBatteryReported = c.hfpBatteryPercent != null,
             bleObserved = ble != null && clock.nowMillis() - ble.sighting.timeMillis < BLE_FRESH_MILLIS,
             channelConnected = status == ChannelStatus.Connected,
             channelUnavailableReason = unavailable,

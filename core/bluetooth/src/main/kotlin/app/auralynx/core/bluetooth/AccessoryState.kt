@@ -35,7 +35,13 @@ enum class BleMatch {
  * [encryptionKey] is set only for [BleMatch.KEY_VERIFIED] sightings, so 1 % battery values are
  * decrypted exclusively for advertisements proven to come from this accessory.
  */
-class BleSnapshot(val sighting: BleSighting, val match: BleMatch, val encryptionKey: ByteArray? = null)
+class BleSnapshot(
+    val sighting: BleSighting,
+    val match: BleMatch,
+    val encryptionKey: ByteArray? = null,
+    /** Buds in ear after debouncing (null until two consecutive advertisements agree). */
+    val stableBudsInEar: Int? = null,
+)
 
 data class AccessoryState(
     val address: String,

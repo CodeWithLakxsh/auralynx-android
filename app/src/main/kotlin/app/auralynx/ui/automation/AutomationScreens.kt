@@ -77,6 +77,7 @@ fun AutomationScreen(vm: AutomationViewModel, onNavigate: (Route) -> Unit) {
     val decision by vm.decision.collectAsStateWithLifecycle()
     val override by vm.override.collectAsStateWithLifecycle()
     val places by vm.places.collectAsStateWithLifecycle()
+    val profiles by vm.audioProfiles.collectAsStateWithLifecycle()
     ScreenColumn {
         Text("Smart automation", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = Tokens.lg))
         AuralynxCard {
@@ -109,7 +110,7 @@ fun AutomationScreen(vm: AutomationViewModel, onNavigate: (Route) -> Unit) {
                 ListItem(
                     headlineContent = { Text(r.name) },
                     supportingContent = {
-                        Text(describe(r, places.associate { it.id to it.name }) + (blocked?.let { "\nWaiting for permission: " + it.joinToString { s -> s.name.lowercase() } } ?: ""))
+                        Text(describe(r, places.associate { it.id to it.name }, profiles.associate { it.id to it.name }) + (blocked?.let { "\nWaiting for permission: " + it.joinToString { s -> s.name.lowercase() } } ?: ""))
                     },
                     overlineContent = { if (active) StatusPill("Active now", StatusKind.LIVE) },
                     trailingContent = { Switch(r.enabled, { vm.setEnabled(r.id, it) }) },
@@ -129,7 +130,7 @@ fun AutomationScreen(vm: AutomationViewModel, onNavigate: (Route) -> Unit) {
     }
 }
 
-fun describe(r: Rule, placeNames: Map<Long, String>): String {
+fun describe(r: Rule, placeNames: Map<Long, String>, profileNames: Map<Long, String> = emptyMap()): String {
     val whenPart = r.conditions.joinToString(" and ") { c ->
         when (c) {
             is Condition.TimeWindow -> "%02d:%02d–%02d:%02d".format(c.startMinute / 60, c.startMinute % 60, c.endMinute / 60, c.endMinute % 60) +
@@ -146,7 +147,7 @@ fun describe(r: Rule, placeNames: Map<Long, String>): String {
         when (a) {
             is Action.SetListeningMode -> a.mode.label()
             is Action.SetConversationAwareness -> "conversation awareness " + if (a.enabled) "on" else "off"
-            is Action.ApplyAudioProfile -> "audio profile #${a.profileId}"
+            is Action.ApplyAudioProfile -> "audio profile " + (profileNames[a.profileId] ?: "#${a.profileId}")
         }
     }
     return "When $whenPart → $thenPart · priority ${r.priority}"

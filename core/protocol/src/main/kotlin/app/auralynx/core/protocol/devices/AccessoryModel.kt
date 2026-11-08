@@ -73,6 +73,18 @@ enum class AccessoryModel(
 
     val isAirPodsMax: Boolean get() = name.startsWith("AIRPODS_MAX")
 
+    /** Product family, used when only the Bluetooth name is known (it cannot tell generations apart). */
+    val family: Family
+        get() = when {
+            this == UNKNOWN -> Family.UNKNOWN
+            name.startsWith("AIRPODS_MAX") -> Family.AIRPODS_MAX
+            name.startsWith("AIRPODS_PRO") -> Family.AIRPODS_PRO
+            name.startsWith("AIRPODS") -> Family.AIRPODS
+            else -> Family.BEATS
+        }
+
+    enum class Family { AIRPODS, AIRPODS_PRO, AIRPODS_MAX, BEATS, UNKNOWN }
+
     companion object {
         fun fromBleModelCode(code: Int): AccessoryModel? = entries.firstOrNull { it.bleModelCode == code }
 

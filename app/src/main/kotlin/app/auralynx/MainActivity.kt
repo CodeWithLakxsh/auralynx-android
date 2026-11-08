@@ -28,6 +28,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         deepLink.value = routeForDeepLink(intent?.data?.host)
+        applyDebugExtras(intent)
         publishShortcuts()
         setContent { AuralynxRoot(deepLink.value) }
     }
@@ -35,6 +36,13 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         deepLink.value = routeForDeepLink(intent.data?.host)
+        applyDebugExtras(intent)
+    }
+
+    /** Debug builds only: `adb shell am start -n <pkg>/app.auralynx.MainActivity --ez bletrace true`. */
+    private fun applyDebugExtras(intent: Intent?) {
+        if (!BuildConfig.DEBUG || intent?.hasExtra("bletrace") != true) return
+        accessories.traceAllSightings = intent.getBooleanExtra("bletrace", false)
     }
 
     override fun onResume() {

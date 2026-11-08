@@ -76,6 +76,8 @@ data class TransportState(
     val channelConnected: Boolean,
     val channelUnavailableReason: ChannelUnavailableReason?,
     val experimentalEnabled: Boolean,
+    /** Android reported an HFP battery value for this device. */
+    val standardBatteryReported: Boolean = false,
 )
 
 /**
@@ -159,7 +161,7 @@ object CapabilityRegistry {
             Feature.BATTERY, Feature.EAR_DETECTION -> when {
                 t.channelConnected -> FeatureSupport.Available(Transport.ACCESSORY_CHANNEL, evidence)
                 t.bleObserved -> FeatureSupport.Available(Transport.BLE_ADVERTISEMENT, evidence)
-                t.standardConnected && feature == Feature.BATTERY ->
+                t.standardConnected && t.standardBatteryReported && feature == Feature.BATTERY ->
                     FeatureSupport.Available(Transport.STANDARD_BLUETOOTH, evidence)
                 else -> FeatureSupport.NeedsAccessoryChannel(
                     t.channelUnavailableReason ?: ChannelUnavailableReason.NOT_CONNECTED,

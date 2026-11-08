@@ -28,14 +28,19 @@ data class BleSighting(
     val status: ProximityStatus,
     val model: AccessoryModel?,
     val txPower: Int?,
+    /** First 9 bytes of the Proximity Pairing value (public, unencrypted part) for diagnostics. */
+    val publicBytes: ByteArray = ByteArray(0),
 )
 
 /** Any Apple Continuity advertisement (used by the research module). */
 data class ContinuitySighting(val address: String, val rssi: Int, val timeMillis: Long, val messages: List<Continuity.Message>)
 
 enum class ScanIntensity {
-    /** Background monitoring. Lowest radio duty cycle; Android may batch results. */
+    /** Background monitoring. Lowest radio duty cycle. */
     LOW_POWER,
+
+    /** While media plays, so ear detection reacts within seconds. */
+    BALANCED,
 
     /** Foreground finder screen only. */
     LOW_LATENCY,
@@ -60,11 +65,12 @@ class ProximityScanner @Inject constructor(@ApplicationContext private val conte
             val status = ProximityStatus.parse(message.value) ?: return@scan null
             BleSighting(
                 address = result.device.address,
-                rssi = result.rssi,
+                rssi = result.rssi.takeIf { it != INVALID_RSSI } ?: UNKNOWN_RSSI,
                 timeMillis = System.currentTimeMillis(),
                 status = status,
                 model = AccessoryModel.fromBleModelCode(status.modelCode),
                 txPower = result.txPower.takeIf { it != ScanResult.TX_POWER_NOT_PRESENT },
+                publicBytes = message.value.copyOfRange(0, minOf(9, message.value.size)),
             )
         }
     }
@@ -102,12 +108,24 @@ class ProximityScanner @Inject constructor(@ApplicationContext private val conte
             }
         }
         val settings = ScanSettings.Builder()
-            .setScanMode(if (intensity == ScanIntensity.LOW_LATENCY) ScanSettings.SCAN_MODE_LOW_LATENCY else ScanSettings.SCAN_MODE_LOW_POWER)
-            .setReportDelay(if (intensity == ScanIntensity.LOW_POWER) 2_000 else 0)
+            .setScanMode(when (intensity) {
+                ScanIntensity.LOW_LATENCY -> ScanSettings.SCAN_MODE_LOW_LATENCY
+                ScanIntensity.BALANCED -> ScanSettings.SCAN_MODE_BALANCED
+                ScanIntensity.LOW_POWER -> ScanSettings.SCAN_MODE_LOW_POWER
+            })
+            // No hardware batching: on some chipsets (verified on OnePlus Pad 3) batches flush only
+            // every ~30 s and interleave stale results with fresh ones.
+            .setReportDelay(0)
             .build()
         runCatching { scanner.startScan(filters, settings, callback) }.onFailure { close(it) }
         awaitClose { runCatching { scanner.stopScan(callback) } }
     }
 
-    companion object { private const val TAG = "ProximityScanner" }
+    companion object {
+        private const val TAG = "ProximityScanner"
+        /** Android reports 127 when no RSSI is available. */
+        private const val INVALID_RSSI = 127
+        /** Weakest possible value, so unknown signal strength never counts as "strong". */
+        const val UNKNOWN_RSSI = -127
+    }
 }

@@ -87,12 +87,37 @@ class SystemBluetoothMonitor @Inject constructor(@ApplicationContext private val
                 addAction(BluetoothDevice.ACTION_NAME_CHANGED)
                 addAction(ACTION_BATTERY_LEVEL_CHANGED)
             }
-            // System broadcasts only; not exported to other apps.
-            ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+            // These Bluetooth broadcasts are sent by the Bluetooth stack process (UID 1002), not the
+            // system UID, so a NOT_EXPORTED receiver never receives them (verified on OxygenOS 16).
+            // All registered actions are protected broadcasts that only the platform can send, so
+            // exporting the receiver does not let other apps spoof connection events.
+            ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_EXPORTED)
             registered = true
         }
-        requestProxy(BluetoothProfile.A2DP)
-        requestProxy(BluetoothProfile.HEADSET)
+        if (a2dp == null) requestProxy(BluetoothProfile.A2DP)
+        if (headset == null) requestProxy(BluetoothProfile.HEADSET)
+        refreshFromProxies()
+    }
+
+    /**
+     * Reconciles the connected set with what the profile proxies report now. Called when the app
+     * resumes and when the adapter turns on, so connections made while a broadcast could not be
+     * delivered (Bluetooth off, process not running) are still picked up. Reads cached proxy state
+     * only; no radio activity.
+     */
+    @SuppressLint("MissingPermission")
+    fun refreshFromProxies() {
+        if (!BluetoothPermissions.hasConnect(context)) return
+        _adapterEnabled.value = adapter?.isEnabled == true
+        val a = a2dp; val h = headset
+        val a2dpDevices = a?.let { runCatching { it.connectedDevices }.getOrNull() }.orEmpty().filter { isAppleAudioAccessory(it) }
+        val hfpDevices = h?.let { runCatching { it.connectedDevices }.getOrNull() }.orEmpty().filter { isAppleAudioAccessory(it) }
+        a2dpDevices.forEach { onProfileConnected(it, AudioProfile.A2DP) }
+        hfpDevices.forEach { onProfileConnected(it, AudioProfile.HEADSET) }
+        if (a != null && h != null) {
+            val live = (a2dpDevices + hfpDevices).map { it.address }.toSet()
+            _connected.value.values.filter { it.address !in live }.forEach { disconnect(it.address, it.name) }
+        }
     }
 
     /** Bonded (paired) Apple/Beats accessories, for the discovery screen. */
@@ -131,6 +156,7 @@ class SystemBluetoothMonitor @Inject constructor(@ApplicationContext private val
                     _adapterEnabled.value = on
                     _events.tryEmit(SystemBluetoothEvent.AdapterChanged(on))
                     if (!on) _connected.value.values.forEach { disconnect(it.address, it.name) }
+                    else if (a2dp == null || headset == null) start() else refreshFromProxies()
                 }
                 BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED, BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED -> {
                     val device = intent.device() ?: return

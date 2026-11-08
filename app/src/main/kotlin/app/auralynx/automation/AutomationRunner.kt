@@ -20,6 +20,7 @@ import app.auralynx.core.data.repo.AutomationRepository
 import app.auralynx.core.data.settings.SettingsRepository
 import app.auralynx.receivers.AutomationAlarmReceiver
 import app.auralynx.system.AudioProfileApplier
+import app.auralynx.system.label
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
@@ -28,7 +29,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -49,12 +52,15 @@ class AutomationRunner @Inject constructor(
     private val collector: ContextCollector,
     private val engine: AutomationEngine,
     private val audioProfiles: AudioProfileApplier,
+    private val profileRepo: app.auralynx.core.data.repo.AudioProfileRepository,
     private val clock: Clock,
     @ApplicationScope private val scope: CoroutineScope,
 ) {
     private val lock = Mutex()
     private val override = MutableStateFlow<ManualOverride?>(null)
     private val lastApplied = mutableMapOf<Pair<String, ActionTarget>, Action>()
+    private val attempted = java.util.concurrent.ConcurrentHashMap<Pair<String, ActionTarget>, Action>()
+    @Volatile private var lastAccessoryKey: Set<Pair<String, String?>>? = null
     private val _lastDecision = MutableStateFlow<app.auralynx.core.automation.Decision?>(null)
     val lastDecision: StateFlow<app.auralynx.core.automation.Decision?> = _lastDecision.asStateFlow()
     val manualOverride: StateFlow<ManualOverride?> = override.asStateFlow()
@@ -62,9 +68,18 @@ class AutomationRunner @Inject constructor(
     @OptIn(FlowPreview::class)
     fun start() {
         scope.launch {
-            combine(repo.rules, settings.settings, accessories.accessories, collector.changes, override) { rules, s, acc, _, _ ->
-                Triple(rules, s, acc.map { it.address }.toSet())
-            }.debounce(750).collect { (rules, s, _) ->
+            // React only to meaningful accessory changes (which accessories are connected and whether
+            // their accessory channel is up), not to every BLE advertisement (~1/s while connected).
+            val accessoryKey = accessories.accessories
+                .map { list -> list.map { it.address to it.channel::class.simpleName }.toSet() }
+                .distinctUntilChanged()
+            combine(repo.rules, settings.settings, accessoryKey, collector.changes, override) { rules, s, acc, _, _ ->
+                Triple(rules, s, acc)
+            }.debounce(750).collect { (rules, s, acc) ->
+                // Forget attempts for accessories that are gone or whose channel state changed, so a
+                // reconnect retries once.
+                attempted.keys.retainAll { k -> acc.any { it.first == k.first } }
+                if (acc != lastAccessoryKey) { attempted.clear(); lastAccessoryKey = acc }
                 val enabled = rules.filter { it.enabled }
                 collector.configure(if (s.automationEnabled) enabled.flatMapTo(mutableSetOf()) { it.signals } else emptySet())
                 if (s.automationEnabled) evaluateNow() else scheduleNextBoundary(emptyList())
@@ -119,6 +134,9 @@ class AutomationRunner @Inject constructor(
             for (acc in connected) {
                 val key = acc.address to target
                 if (lastApplied[key] == action) continue
+                // Do not retry (or re-log) an action that already failed in this accessory state.
+                if (attempted[key] == action) continue
+                attempted[key] = action
                 val outcome = execute(acc.address, action)
                 val label = when (outcome) {
                     is Outcome.Success -> { lastApplied[key] = action; "APPLIED" }
@@ -141,10 +159,10 @@ class AutomationRunner @Inject constructor(
         is Action.ApplyAudioProfile -> Outcome.Success(Unit)
     }
 
-    private fun describe(a: Action): String = when (a) {
-        is Action.SetListeningMode -> "Listening mode: " + a.mode.name
+    private suspend fun describe(a: Action): String = when (a) {
+        is Action.SetListeningMode -> "Listening mode: " + a.mode.label()
         is Action.SetConversationAwareness -> "Conversation awareness: " + if (a.enabled) "on" else "off"
-        is Action.ApplyAudioProfile -> "Audio profile #${a.profileId}"
+        is Action.ApplyAudioProfile -> "Audio profile: " + (profileRepo.get(a.profileId)?.name ?: "#${a.profileId} (deleted)")
     }
 
     /** One inexact alarm at the next window boundary; the OS may batch it with others to save power. */

@@ -111,6 +111,8 @@ object Tokens {
     val gutter = 20.dp
     val iconSm = 18.dp; val iconMd = 24.dp; val iconLg = 32.dp
     val touchTarget = 48.dp
+    /** Readable content width on tablets and landscape phones. */
+    val maxContentWidth = 720.dp
     const val motionShort = 150
     const val motionMedium = 280
     const val motionLong = 450
