@@ -127,6 +127,20 @@ class TranslationViewModel @Inject constructor(
         refresh()
     }
 
+    val contactEmail = MutableStateFlow(secrets.getString(SecretStore.TRANSLATION_CONTACT_EMAIL).orEmpty())
+
+    fun setFreeCloud(enabled: Boolean) = viewModelScope.launch {
+        settingsRepo.update { it.copy(translationFreeCloudEnabled = enabled) }
+        refresh()
+    }
+
+    fun saveContactEmail(email: String) {
+        val e = email.trim()
+        if (e.isEmpty()) secrets.remove(SecretStore.TRANSLATION_CONTACT_EMAIL)
+        else if (android.util.Patterns.EMAIL_ADDRESS.matcher(e).matches()) secrets.putString(SecretStore.TRANSLATION_CONTACT_EMAIL, e)
+        contactEmail.value = e
+    }
+
     fun setSaveHistory(on: Boolean) = viewModelScope.launch { settingsRepo.update { it.copy(translationSaveHistory = on) } }
 
     override fun onCleared() { tts.shutdown() }
@@ -168,7 +182,7 @@ fun TranslationScreen(vm: TranslationViewModel) {
                 null -> StatusPill("Checking…", StatusKind.LIMITED)
                 PairAvailability.ENGINE_UNAVAILABLE -> {
                     StatusPill("No translation service", StatusKind.UNAVAILABLE)
-                    InfoNote("This device does not provide Android's system translation service, so on-device translation is unavailable for every language. You can configure your own LibreTranslate server below.")
+                    InfoNote("This device does not provide Android's system translation service, so on-device translation is unavailable for every language. You can turn on free cloud translation below.")
                 }
                 else -> {
                     StatusPill("Pair not supported", StatusKind.UNAVAILABLE)
@@ -203,7 +217,17 @@ fun TranslationScreen(vm: TranslationViewModel) {
             SettingSwitch("Save translation history", st?.translationSaveHistory == true, vm::setSaveHistory, supporting = "Stored only on this device")
             var url by remember(st?.translationCloudUrl) { mutableStateOf(st?.translationCloudUrl.orEmpty()) }
             var key by remember { mutableStateOf("") }
-            Text("Optional cloud translation", style = MaterialTheme.typography.titleSmall)
+            SettingSwitch("Free cloud translation (MyMemory)", st?.translationFreeCloudEnabled == true, vm::setFreeCloud,
+                supporting = "Off by default. Sends the recognised text (never audio) over HTTPS to MyMemory by Translated srl. Free, no account. Limit: 5,000 characters per day, or 50,000 if you add an email. MyMemory's terms and privacy policy apply.")
+            if (st?.translationFreeCloudEnabled == true) {
+                val savedEmail by vm.contactEmail.collectAsStateWithLifecycle()
+                var email by remember(savedEmail) { mutableStateOf(savedEmail) }
+                OutlinedTextField(email, { email = it }, label = { Text("Email for the higher free limit (optional)") }, singleLine = true,
+                    modifier = Modifier.fillMaxWidth(), isError = email.isNotBlank() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches())
+                TextButton(onClick = { vm.saveContactEmail(email) }) { Text("Save email") }
+                InfoNote("Stored encrypted on this device and sent only to MyMemory as their contact address.")
+            }
+            Text("Your own server (optional)", style = MaterialTheme.typography.titleSmall)
             InfoNote("Off by default. If enabled, the text you speak is sent over HTTPS to the LibreTranslate server you enter. Auralynx ships with no server and no key.")
             OutlinedTextField(url, { url = it }, label = { Text("Server URL (https://…)") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
                 isError = url.isNotBlank() && !LibreTranslateEngine.isAllowedUrl(url))

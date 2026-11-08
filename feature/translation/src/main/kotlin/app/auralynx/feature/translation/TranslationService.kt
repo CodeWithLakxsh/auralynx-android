@@ -15,6 +15,7 @@ import javax.inject.Singleton
 class TranslationService @Inject constructor(
     val system: SystemTranslationEngine,
     val cloud: LibreTranslateEngine,
+    val freeCloud: MyMemoryEngine,
     private val history: TranslationHistoryRepository,
     private val settings: SettingsRepository,
 ) {
@@ -25,6 +26,8 @@ class TranslationService @Inject constructor(
         if (local == PairAvailability.READY) return system to local
         val remote = cloud.availability(source, target)
         if (remote == PairAvailability.READY) return cloud to remote
+        val free = freeCloud.availability(source, target)
+        if (free == PairAvailability.READY) return freeCloud to free
         return null to local
     }
 

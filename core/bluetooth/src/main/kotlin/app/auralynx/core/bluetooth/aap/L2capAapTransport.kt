@@ -14,17 +14,8 @@ import app.auralynx.core.common.IoDispatcher
 import app.auralynx.core.protocol.aap.AapConstants
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -92,27 +83,9 @@ class L2capAapTransport @Inject constructor(
         } catch (e: IOException) {
             throw ChannelError.ConnectFailed(e.message ?: "Socket creation failed")
         }
-        // socket.connect() blocks and ignores coroutine cancellation; a watchdog closes the socket to
-        // unblock it when the accessory does not answer.
-        val timedOut = AtomicBoolean(false)
-        coroutineScope {
-            val watchdog = launch {
-                delay(CONNECT_TIMEOUT_MS)
-                timedOut.set(true)
-                runCatching { socket.close() }
-            }
-            try {
-                socket.connect()
-            } catch (e: IOException) {
-                runCatching { socket.close() }
-                if (timedOut.get()) throw ChannelError.Timeout()
-                throw ChannelError.ConnectFailed(e.message ?: "connect() failed")
-            } finally {
-                watchdog.cancel()
-            }
-        }
+        val connection = connectSocket(socket, io, CONNECT_TIMEOUT_MS)
         Diag.i(TAG) { "AAP channel connected to $address" }
-        SocketConnection(socket, io)
+        connection
     }
 
     @SuppressLint("Range")
@@ -123,32 +96,6 @@ class L2capAapTransport @Inject constructor(
         .setAuthenticationRequired(false)
         .setEncryptionRequired(false)
         .build()
-
-    private class SocketConnection(private val socket: BluetoothSocket, private val io: CoroutineDispatcher) : AapConnection {
-        private val writeLock = Mutex()
-        private val closed = AtomicBoolean(false)
-
-        override val incoming: Flow<ByteArray> = flow {
-            val input = socket.inputStream
-            val buffer = ByteArray(MAX_PACKET)
-            while (!closed.get()) {
-                val n = try { input.read(buffer) } catch (e: IOException) { if (closed.get()) break else throw e }
-                if (n < 0) break
-                if (n > 0) emit(buffer.copyOf(n))
-            }
-        }.flowOn(io)
-
-        override suspend fun send(packet: ByteArray) = writeLock.withLock {
-            withContext(io) {
-                socket.outputStream.write(packet)
-                socket.outputStream.flush()
-            }
-        }
-
-        override fun close() {
-            if (closed.compareAndSet(false, true)) runCatching { socket.close() }
-        }
-    }
 
     companion object {
         private const val TAG = "L2capAapTransport"

@@ -44,6 +44,8 @@ data class AppSettings(
     val translationCloudUrl: String? = null,
     val translationCloudEnabled: Boolean = false,
     val translationSaveHistory: Boolean = true,
+    /** Opt-in free cloud translation through the public MyMemory API. */
+    val translationFreeCloudEnabled: Boolean = false,
     val sleepTimerEndsAtMillis: Long? = null,
 )
 
@@ -76,6 +78,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext context: Contex
         val cloudUrl = stringPreferencesKey("translation_cloud_url")
         val cloudEnabled = booleanPreferencesKey("translation_cloud_enabled")
         val saveHistory = booleanPreferencesKey("translation_save_history")
+        val freeCloud = booleanPreferencesKey("translation_free_cloud")
         val sleepTimer = longPreferencesKey("sleep_timer_ends")
     }
 
@@ -104,6 +107,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext context: Contex
             translationCloudUrl = p[K.cloudUrl],
             translationCloudEnabled = p[K.cloudEnabled] ?: d.translationCloudEnabled,
             translationSaveHistory = p[K.saveHistory] ?: d.translationSaveHistory,
+            translationFreeCloudEnabled = p[K.freeCloud] ?: d.translationFreeCloudEnabled,
             sleepTimerEndsAtMillis = p[K.sleepTimer],
         )
     }
@@ -135,6 +139,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext context: Contex
             s.translationCloudUrl?.let { p[K.cloudUrl] = it } ?: p.remove(K.cloudUrl)
             p[K.cloudEnabled] = s.translationCloudEnabled
             p[K.saveHistory] = s.translationSaveHistory
+            p[K.freeCloud] = s.translationFreeCloudEnabled
             s.sleepTimerEndsAtMillis?.let { p[K.sleepTimer] = it } ?: p.remove(K.sleepTimer)
         }
     }
@@ -166,6 +171,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext context: Contex
         translationCloudUrl = p[K.cloudUrl],
         translationCloudEnabled = p[K.cloudEnabled] ?: false,
         translationSaveHistory = p[K.saveHistory] ?: true,
+        translationFreeCloudEnabled = p[K.freeCloud] ?: false,
         sleepTimerEndsAtMillis = p[K.sleepTimer],
     )
 }

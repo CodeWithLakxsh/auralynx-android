@@ -77,5 +77,6 @@ class SecretStore @Inject constructor(@ApplicationContext context: Context) {
         fun irkName(address: String) = "irk:" + address.uppercase()
         fun encKeyName(address: String) = "enc:" + address.uppercase()
         const val TRANSLATION_API_KEY = "translation_api_key"
+        const val TRANSLATION_CONTACT_EMAIL = "translation_contact_email"
     }
 }
