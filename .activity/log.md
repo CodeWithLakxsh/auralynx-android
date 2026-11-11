@@ -200,3 +200,4 @@
 - 2026-11-07T10:55:47+05:30: Audio engine refactor
 - 2026-11-11T11:33:23+05:30: Audio pipeline fix
 - 2026-11-11T21:58:48+05:30: Codec update
+- 2026-11-11T16:16:44+05:30: UI polish
